@@ -6,6 +6,7 @@ def analyze_emotions(content: str, date: str, title: str) -> dict byllm(
     method="Reason", temperature=0.7
 ) {
 
+}
 def summarize_entries(entries: list) -> str byllm(
     method="Reason", temperature=0.5
 ) {
