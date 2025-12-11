@@ -1,14 +1,14 @@
-import:py from datetime { datetime }
-import:py from typing { List, Dict, Any }
+import from datetime { datetime }
+import from typing { List, Dict, Any }
 
 # Emotion analysis using LLM
 def analyze_emotions(content: str, date: str, title: str) -> dict byllm(
-    method="Reason", temperature=0.7
+    method="ReAct", temperature=0.7
 ) {
 
 }
 def summarize_entries(entries: list) -> str byllm(
-    method="Reason", temperature=0.5
+    method="ReAct", temperature=0.5
 ) {
    
 }
