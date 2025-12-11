@@ -4,7 +4,7 @@ import from datetime  { date, timedelta, datetime }
 # cl embed_text(str) from __main__;  # For Python embedding bridge
 
 ########################  GLOBAL MODELS  ########################
-glob llm = Model(model_name="gpt-4o") { temperature = 0.7; }
+glob llm = Model(model_name="gpt-4o", temperature = 0.7); 
 
 ########################  UTILITY FUNCTIONS  ########################
 def get_dates(range_option: str) -> tuple {
@@ -57,7 +57,7 @@ edge similar_to { has cos_sim: float; }
 ########################  INITIALIZATION  ########################
 walker init {
     can start with `root entry {
-        if !root.user {
+        if not root.user {
             root.user = User();
             root ++> root.user;
             print("New user initialized.");
@@ -75,7 +75,7 @@ walker add_journal {
 
     can start with `root entry {
         user = root.user;
-        if !user {
+        if not user {
             report {"error": "User not initialized. Run 'init' first."};
             return;
         }
