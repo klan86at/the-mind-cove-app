@@ -82,10 +82,10 @@ edge relatedToEmotion {
 
 
 with entry {
-    root ++> journalEntry();
-    root ++> journal();
-    root ++> mentalState();
-    root ++> emotion();
+    root ++> journalEntry(title="sample title", content="sample content", date="2024-06-01");
+    root ++> journal(entries=[]);
+    root ++> mentalState(mood="neutral", stressLevel=4);
+    root ++> emotion(name="anxiety", intensity=5, triggers=["work", "social situations"]);
 
     agent = StateAgent() spawn root;
 }
