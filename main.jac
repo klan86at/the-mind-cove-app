@@ -1,6 +1,7 @@
 ########################  IMPORTS  ########################
 import from byllm.lib { Model }
 import from datetime  { date, timedelta, datetime }
+import from time { time }
 # cl embed_text(str) from __main__;  # For Python embedding bridge
 
 ########################  GLOBAL MODELS  ########################
@@ -82,7 +83,7 @@ walker add_journal {
 
         # Embed and store journal
         vec = embed(self.text);
-        now = __jac__.time_now();
+        now = time();
         today_str = date.fromtimestamp(now).strftime("%m/%d/%Y");
         j = Journal(note=self.text, ts=now, embedding=vec);
         user ++>: Dated(date=today_str) :+> j;
@@ -170,7 +171,7 @@ walker log_mood {
     }
 }
 
-########################  TOOLS FOR INSIGHTS (Restaurant Feedback Pattern)  ########################
+########################  TOOLS FOR INSIGHTS ########################
 def filter_moods(start_date_str: str, end_date_str: str) -> dict {
     start = datetime.strptime(start_date_str, "%m/%d/%Y").date();
     end   = datetime.strptime(end_date_str, "%m/%d/%Y").date();
@@ -192,7 +193,7 @@ def filter_triggers(start_date_str: str, end_date_str: str) -> dict {
     return tag_counts;
 }
 
-########################  INSIGHT WALKERS (Restaurant Feedback Pattern)  ########################
+########################  INSIGHT WALKERS ########################
 """You are a compassionate wellbeing coach.  
 Use ONLY the mood & trigger data from the tools.  
 Produce a plain-text summary (3 short paragraphs):  
