@@ -1,4 +1,5 @@
-import from react {useState, import from @jac-client/react {useState, useEffect}
+import from react {useState, useEffect}
+import from @jac-client/react {useState, useEffect}
 import from @jac-client/utils {jacSpawn, jacIsLoggedIn}
 
 
@@ -100,7 +101,6 @@ def Dashboard() -> any {
     let [loading, setLoading] = useState(True);
     
     useEffect(lambda -> None {
-        # Fetch dashboard data
         setLoading(False);
         setStats({
             totalEntries: 12,
@@ -279,7 +279,7 @@ def JournalEntryCard({entry}) -> any {
         <h3 style={{fontSize: "1.25rem", marginBottom: "0.5rem", color: "#333"}}>
             {entry.title}
         </h3>
-        <p style={{color: "#666", lineHeight: "1.6"}}>
+        <p style={{color: "#666", lineHeight: "1.5"}}>
             {entry.content}
         </p>
         <div style={{marginTop: "1rem", fontSize: "0.875rem", color: "#999"}}>
@@ -291,19 +291,9 @@ def JournalEntryCard({entry}) -> any {
 # Mood Tracker View
 def MoodTracker() -> any {
     let [currentMood, setCurrentMood] = useState(5);
-    let [moodHistory, setMoodHistory] = useState([]);
-    
-    def handleMoodSubmit() -> None {
-        let newEntry = {
-            mood: currentMood,
-            date: Date.now()
-        };
-        setMoodHistory([...moodHistory, newEntry]);
-    }
     
     return <div style={{display: "grid", gap: "1.5rem"}}>
         <h2 style={{color: "white", fontSize: "2rem"}}>Mood Tracker</h2>
-        
         <div style={{
             background: "white",
             borderRadius: "12px",
@@ -311,85 +301,37 @@ def MoodTracker() -> any {
             textAlign: "center"
         }}>
             <h3 style={{marginBottom: "1rem", color: "#333"}}>How are you feeling today?</h3>
-            <div style={{marginBottom: "2rem"}}>
-                <input 
-                    type="range"
-                    min="1"
-                    max="10"
-                    value={currentMood}
-                    onChange={lambda e: any -> None { setCurrentMood(parseInt(e.target.value)); }}
-                    style={{width: "100%", marginBottom: "1rem"}}
-                />
-                <div style={{fontSize: "2rem", marginBottom: "1rem"}}>
-                    {currentMood <= 3 ? "😢" : currentMood <= 6 ? "😐" : "😊"}
-                </div>
-                <div style={{fontSize: "1.25rem", fontWeight: "bold", color: "#667eea"}}>
-                    {currentMood}/10
-                </div>
+            <div style={{fontSize: "3rem", marginBottom: "1rem"}}>
+                {currentMood <= 3 ? "😢" : currentMood <= 6 ? "😐" : "😊"}
             </div>
-            <button onClick={handleMoodSubmit} style={{
-                padding: "0.75rem 2rem",
-                background: "#667eea",
-                color: "white",
-                border: "none",
-                borderRadius: "8px",
-                cursor: "pointer",
-                fontWeight: "600",
-                fontSize: "1rem"
-            }}>
-                Log Mood
-            </button>
+            <input 
+                type="range"
+                min="1"
+                max="10"
+                value={currentMood}
+                onChange={lambda e: any -> None { setCurrentMood(parseInt(e.target.value)); }}
+                style={{width: "100%", marginBottom: "1rem"}}
+            />
+            <div style={{color: "#667eea", fontWeight: "600", fontSize: "1.25rem"}}>
+                {currentMood}/10
+            </div>
         </div>
     </div>;
 }
 
 # Insights View
 def InsightsView() -> any {
-    let [insights, setInsights] = useState(None);
-    let [loading, setLoading] = useState(True);
-    
-    useEffect(lambda -> None {
-        # Simulate loading insights
-        setTimeout(lambda -> None {
-            setInsights({
-                summary: "Your mood has been generally positive this week with an average of 7.2/10.",
-                suggestions: [
-                    "Continue your morning routine - it seems to boost your mood",
-                    "Consider taking breaks during stressful work periods",
-                    "Your evening walks appear to have a positive impact"
-                ]
-            });
-            setLoading(False);
-        }, 1000);
-    }, []);
-    
-    if loading {
-        return <div style={{textAlign: "center", padding: "3rem", color: "white"}}>
-            Loading insights...
-        </div>;
-    }
-    
     return <div style={{display: "grid", gap: "1.5rem"}}>
         <h2 style={{color: "white", fontSize: "2rem"}}>Insights</h2>
-        
         <div style={{
             background: "white",
             borderRadius: "12px",
-            padding: "2rem"
+            padding: "2rem",
+            textAlign: "center"
         }}>
-            <h3 style={{marginBottom: "1rem", color: "#333"}}>Weekly Summary</h3>
-            <p style={{color: "#666", lineHeight: "1.6", marginBottom: "2rem"}}>
-                {insights.summary}
+            <p style={{color: "#666", fontSize: "1.125rem"}}>
+                Insights and analytics coming soon...
             </p>
-            
-            <h4 style={{marginBottom: "1rem", color: "#333"}}>Suggestions</h4>
-            <ul style={{color: "#666", lineHeight: "1.6"}}>
-                {insights.suggestions.map(lambda suggestion, idx: any -> any {
-                    return <li key={idx} style={{marginBottom: "0.5rem"}}>
-                        {suggestion}
-                    </li>;
-                })}
-            </ul>
         </div>
     </div>;
 }
@@ -409,14 +351,13 @@ def LoginView({onLogin}) -> any {
             padding: "3rem",
             textAlign: "center",
             maxWidth: "400px",
-            width: "100%",
-            margin: "1rem"
+            width: "90%"
         }}>
-            <h1 style={{fontSize: "2rem", marginBottom: "1rem", color: "#333"}}>
+            <h1 style={{fontSize: "2rem", marginBottom: "1rem", color: "#667eea"}}>
                 🧠 Mental Health Journal
             </h1>
             <p style={{color: "#666", marginBottom: "2rem"}}>
-                Track your mood, journal your thoughts, and gain insights into your mental wellbeing.
+                Track your mental wellness journey
             </p>
             <button onClick={onLogin} style={{
                 padding: "1rem 2rem",
@@ -433,172 +374,4 @@ def LoginView({onLogin}) -> any {
             </button>
         </div>
     </div>;
-}
-
-# Export the main app
-export app;   </h3>
-        <p style={{fontSize: "0.875rem", color: "#999", marginBottom: "1rem"}}>
-            {Date(entry.date).toLocaleDateString()}
-        </p>
-        <p style={{color: "#666", lineHeight: "1.6"}}>
-            {entry.content}
-        </p>
-    </div>;
-}
-
-# Mood Tracker View
-def MoodTracker() -> any {
-    let [mood, setMood] = useState("good");
-    let [stressLevel, setStressLevel] = useState(5);
-    
-    return <div style={{display: "grid", gap: "1.5rem"}}>
-        <h2 style={{color: "white", fontSize: "2rem"}}>Mood Tracker</h2>
-        
-        <div style={{
-            background: "white",
-            borderRadius: "12px",
-            padding: "2rem",
-            display: "grid",
-            gap: "2rem"
-        }}>
-            <div>
-                <label style={{display: "block", marginBottom: "1rem", fontWeight: "600"}}>
-                    How are you feeling today?
-                </label>
-                <div style={{display: "flex", gap: "0.5rem", flexWrap: "wrap"}}>
-                    {["excellent", "great", "good", "okay", "poor"].map(lambda m: any -> any {
-                        return <button 
-                            key={m}
-                            onClick={lambda e: any -> None { setMood(m); }}
-                            style={{
-                                padding: "0.75rem 1.5rem",
-                                border: "2px solid " + (mood === m ? "#667eea" : "#e0e0e0"),
-                                background: mood === m ? "#667eea" : "white",
-                                color: mood === m ? "white" : "#333",
-                                borderRadius: "8px",
-                                cursor: "pointer",
-                                fontWeight: "600"
-                            }}
-                        >
-                            {m.capitalize()}
-                        </button>;
-                    })}
-                </div>
-            </div>
-            
-            <div>
-                <label style={{display: "block", marginBottom: "1rem", fontWeight: "600"}}>
-                    Stress Level: {stressLevel}/10
-                </label>
-                <input 
-                    type="range"
-                    min="0"
-                    max="10"
-                    value={stressLevel}
-                    onChange={lambda e: any -> None { setStressLevel(Number(e.target.value)); }}
-                    style={{width: "100%"}}
-                />
-            </div>
-            
-            <button style={{
-                padding: "1rem",
-                background: "#667eea",
-                color: "white",
-                border: "none",
-                borderRadius: "8px",
-                cursor: "pointer",
-                fontWeight: "600",
-                fontSize: "1rem"
-            }}>
-                Save Mood Entry
-            </button>
-        </div>
-    </div>;
-}
-
-# Insights View
-def InsightsView() -> any {
-    return <div style={{display: "grid", gap: "1.5rem"}}>
-        <h2 style={{color: "white", fontSize: "2rem"}}>Insights & Patterns</h2>
-        
-        <div style={{
-            background: "white",
-            borderRadius: "12px",
-            padding: "2rem",
-            textAlign: "center"
-        }}>
-            <p style={{color: "#999", fontSize: "1.125rem"}}>
-                Keep tracking your mood and journal entries to see personalized insights and patterns.
-            </p>
-        </div>
-    </div>;
-}
-
-# Login View
-def LoginView({onLogin}) -> any {
-    let [username, setUsername] = useState("");
-    let [password, setPassword] = useState("");
-    
-    return <div style={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-    }}>
-        <div style={{
-            background: "white",
-            borderRadius: "16px",
-            padding: "3rem",
-            width: "100%",
-            maxWidth: "400px",
-            boxShadow: "0 10px 40px rgba(0,0,0,0.2)"
-        }}>
-            <h1 style={{fontSize: "2rem", marginBottom: "2rem", textAlign: "center", color: "#667eea"}}>
-                Welcome Back
-            </h1>
-            <form style={{display: "grid", gap: "1rem"}}>
-                <input 
-                    type="text"
-                    placeholder="Username"
-                    value={username}
-                    onChange={lambda e: any -> None { setUsername(e.target.value); }}
-                    style={{
-                        padding: "1rem",
-                        border: "2px solid #e0e0e0",
-                        borderRadius: "8px",
-                        fontSize: "1rem"
-                    }}
-                />
-                <input 
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={lambda e: any -> None { setPassword(e.target.value); }}
-                    style={{
-                        padding: "1rem",
-                        border: "2px solid #e0e0e0",
-                        borderRadius: "8px",
-                        fontSize: "1rem"
-                    }}
-                />
-                <button onClick={lambda e: any -> None {
-                    e.preventDefault();
-                    onLogin();
-                }} style={{
-                    padding: "1rem",
-                    background: "#667eea",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "8px",
-                    cursor: "pointer",
-                    fontWeight: "600",
-                    fontSize: "1rem"
-                }}>
-                    Sign In
-                </button>
-            </form>
-        </div>
-    </div>;
-}
 }
