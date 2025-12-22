@@ -2,6 +2,8 @@
 import from byllm.lib { Model }
 import from datetime  { date, timedelta, datetime }
 import from time { time }
+import from datetime  { date, timedelta, datetime }
+import from time { time }
 # cl embed_text(str) from __main__;  # For Python embedding bridge
 
 ########################  GLOBAL MODELS  ########################
@@ -86,12 +88,13 @@ walker add_journal {
         now = time();
         today_str = date.fromtimestamp(now).strftime("%m/%d/%Y");
         j = Journal(note=self.text, ts=now, embedding=vec);
-        user ++>: Dated(date=today_str) :+> j;
+        user ++[Dated(date=today_str)]++> j;
 
         # Link to similar past journals
         links = 0;
-        for old in user --> node::Journal {
-            if links >= self.max_links: break;
+        journals = [user --> Journal];
+        for old in journals {
+            if links >= self.max_links { break; }
             sim = cos_sim(vec, old.embedding);
             if sim >= self.similarity_threshold {
                 j ++[similar_to(cos_sim=sim)]++> old;
@@ -102,9 +105,16 @@ walker add_journal {
         # 🔥 REPLACES KEYWORD TRIGGERS: LLM-Powered Trigger Extraction
         discovered_triggers = extract_triggers(self.text);
         for trigger_phrase in discovered_triggers {
-            existing = [user --> node::Trigger(tag==trigger_phrase)];
-            t = existing[0] if existing else Trigger(tag=trigger_phrase, strength=0.8);
-            if !existing: user ++> t;
+            existing = [user --> Trigger];
+            existing_trigger = null;
+            for t in existing {
+                if t.tag == trigger_phrase {
+                    existing_trigger = t;
+                    break;
+                }
+            }
+            t = existing_trigger if existing_trigger else Trigger(tag=trigger_phrase, strength=0.8);
+            if not existing_trigger { user ++> t; }
             t ++[influences(weight=0.8)]++> j;
         }
 
@@ -145,7 +155,7 @@ walker log_mood {
 
     can start with `root entry {
         user = root.user;
-        if !user {
+        if not user {
             report {"error": "User not initialized."};
             return;
         }
@@ -153,17 +163,24 @@ walker log_mood {
         now = __jac__.time_now();
         today_str = date.fromtimestamp(now).strftime("%m/%d/%Y");
         m = Mood(value=self.value, ts=now);
-        user ++>: Dated(date=today_str) :+> m;
+        user ++[Dated(date=today_str)]++> m;
 
         # Link to previous mood
-        prev_moods = [user --> node::Mood];
-        if prev_moods: prev_moods[-1] ++> m;
+        prev_moods = [user --> Mood];
+        if prev_moods { prev_moods[-1] ++> m; }
 
         # Link triggers
         for tag in self.triggers {
-            existing = [user --> node::Trigger(tag==tag)];
-            t = existing[0] if existing else Trigger(tag=tag);
-            if !existing: user ++> t;
+            existing = [user --> Trigger];
+            existing_trigger = null;
+            for t in existing {
+                if t.tag == tag {
+                    existing_trigger = t;
+                    break;
+                }
+            }
+            t = existing_trigger if existing_trigger else Trigger(tag=tag);
+            if not existing_trigger { user ++> t; }
             t ++[influences(weight=1.0)]++> m;
         }
 
@@ -176,18 +193,32 @@ def filter_moods(start_date_str: str, end_date_str: str) -> dict {
     start = datetime.strptime(start_date_str, "%m/%d/%Y").date();
     end   = datetime.strptime(end_date_str, "%m/%d/%Y").date();
 
-    all_moods = [root->:Dated:date>=start_date_str:date<=end_date_str:->(?Mood)];
-    highs = [m for m in all_moods if m.value >= 8];
-    lows  = [m for m in all_moods if m.value <= 3];
-    meds  = [m for m in all_moods if m.value > 3 and m.value < 8];
+    all_moods = [root --> Mood];
+    filtered_moods = [];
+    for m in all_moods {
+        mood_date = date.fromtimestamp(m.ts).strftime("%m/%d/%Y");
+        if mood_date >= start_date_str and mood_date <= end_date_str {
+            filtered_moods.append(m);
+        }
+    }
+    highs = [m for m in filtered_moods if m.value >= 8];
+    lows  = [m for m in filtered_moods if m.value <= 3];
+    meds  = [m for m in filtered_moods if m.value > 3 and m.value < 8];
 
-    return {"high": len(highs), "low": len(lows), "medium": len(meds), "total": len(all_moods)};
+    return {"high": len(highs), "low": len(lows), "medium": len(meds), "total": len(filtered_moods)};
 }
 
 def filter_triggers(start_date_str: str, end_date_str: str) -> dict {
-    all_trigs = [root->:Dated:date>=start_date_str:date<=end_date_str:->(?Trigger)];
-    tag_counts = {};
+    all_trigs = [root --> Trigger];
+    filtered_trigs = [];
     for t in all_trigs {
+        trigger_date = date.fromtimestamp(t.ts if hasattr(t, 'ts') else 0).strftime("%m/%d/%Y");
+        if trigger_date >= start_date_str and trigger_date <= end_date_str {
+            filtered_trigs.append(t);
+        }
+    }
+    tag_counts = {};
+    for t in filtered_trigs {
         tag_counts[t.tag] = tag_counts.get(t.tag, 0) + 1;
     }
     return tag_counts;
@@ -239,12 +270,26 @@ def mood_counts(start_date_str: str, end_date_str: str) -> dict {
     mood_vals = [];
     trigger_counts = [];
     for day in dates {
-        moods = [root->:Dated:date==day:->(?Mood)];
-        avg = sum(m.value for m in moods) / len(moods) if moods else 0;
+        moods = [root --> Mood];
+        day_moods = [];
+        for m in moods {
+            mood_date = date.fromtimestamp(m.ts).strftime("%m/%d/%Y");
+            if mood_date == day {
+                day_moods.append(m);
+            }
+        }
+        avg = sum(m.value for m in day_moods) / len(day_moods) if day_moods else 0;
         mood_vals.append(avg);
 
-        trigs = [root->:Dated:date==day:->(?Trigger)];
-        trigger_counts.append(len(trigs));
+        trigs = [root --> Trigger];
+        day_trigs = [];
+        for t in trigs {
+            trigger_date = date.fromtimestamp(t.ts if hasattr(t, 'ts') else 0).strftime("%m/%d/%Y");
+            if trigger_date == day {
+                day_trigs.append(t);
+            }
+        }
+        trigger_counts.append(len(day_trigs));
     }
 
     report {
